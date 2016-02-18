@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+<body>
+    <form style="display:none">
+        <input type="text" value="<%=name%>" id="name">
+        <input type="password" value="<%=password%>" id="pwd">
+    </form>
+<script language="JavaScript" type="text/javascript" src="vizportalMinLibs.js"></script>
+<script language="JavaScript" type="text/javascript" src="random.js"></script>
+<script language="JavaScript" type="text/javascript" src="hash.js"></script>
+<script language="JavaScript" type="text/javascript" src="rsa.js"></script>
+<script language="JavaScript" type="text/javascript" src="aes.js"></script>
+<script language="JavaScript" type="text/javascript" src="api.js"></script>
+<script type="text/javascript" src="cryptico.js"></script>
+<script type="text/javascript" src="jquery.min.js"></script>
+<script type="text/javascript">
+    $.ajax({
+        type: 'POST',
+        url: 'http://bi.aihaisi.com/vizportal/api/web/v1/generatePublicKey',
+        contentType: 'application/json',
+        data: JSON.stringify({"method":"generatePublicKey","params":{}}),
+        success: function(data){
+            var name = $('#name').val();
+            var pwd = $('#pwd').val();
+            console.log(data);
+            //加密的密码需要动态指定
+            var encryptPwd = rsa.encrypt("654321",{
+              "n": data.result.key.n,
+              "e": data.result.key.e
+            });
+            var loginData = {
+                "method": "login",
+                "params": {
+                    "username": "emac", //需要动态指定
+                    "encryptedPassword": encryptPwd,
+                    "keyId": data.result.keyId
+                }
+            }
+            $.ajax({
+                type: 'POST',
+                //url: 'http://bi.aihaisi.com/vizportal/api/web/v1/login',
+                url: 'http://localhost:8000/login',
+                contentType: 'application/json',
+                data: JSON.stringify(loginData),
+                success: function(data, status, xhr){
+                    console.log(data);
+                    //window.location.replace("http://bi.aihaisi.com");
+                    location.href="http://localhost:8000/set_cookie";
+                }
+            })
+
+        }
+    });
+</script>
+</body>
+</html>
